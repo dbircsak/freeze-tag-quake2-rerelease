@@ -1,0 +1,5 @@
+﻿/.vs
+/src/vcpkg_installed
+/src/x64
+/src/game.vcxproj.user
+/game_x64.*
