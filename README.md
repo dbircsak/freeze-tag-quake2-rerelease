@@ -14,6 +14,8 @@ Special thanks to Perecli Manole for their grapple hook code
 ## What Is Freeze Tag
 Shoot the enemy team. When they die, they "freeze" and cannot respawn. Kill everyone on the team to score a point and everyone will "thaw" and be released to spawn in again. If you find your frozen teammate, stand by them for three seconds to "thaw" them so they can respawn again. Bonus strategy: there's a grappling hook that can pull you around as well as pull people to you.
 
+[![YouTube](https://img.youtube.com/vi/GMu3_jjiyr4/hqdefault.jpg)](https://www.youtube.com/watch?v=GMu3_jjiyr4)
+
 ---
 
 ## Current state:
