@@ -3,6 +3,9 @@
 
 #include "g_local.h"
 #include "bots/bot_includes.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 CHECK_GCLIENT_INTEGRITY;
 CHECK_EDICT_INTEGRITY;
@@ -352,6 +355,9 @@ void InitGame()
 	g_map_list_shuffle = gi.cvar("g_map_list_shuffle", "0", CVAR_NOFLAGS);
 	g_lag_compensation = gi.cvar("g_lag_compensation", "1", CVAR_NOFLAGS);
 
+	/* freeze */
+	cvarFreeze();
+	/* freeze */
 	// items
 	InitItems();
 
@@ -661,6 +667,16 @@ void CheckDMRules()
 	if (!deathmatch->integer)
 		return;
 
+	/* freeze */
+	for (int i = 0; i < 2; i++)
+		if (freeze[i].break_time > level.time)
+			return;
+	if (endCheck())
+	{
+		EndDMLevel();
+		return;
+	}
+	/* freeze */
 	// ZOID
 	if (ctf->integer && CTFCheckRules())
 	{

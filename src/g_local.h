@@ -2794,6 +2794,12 @@ struct client_respawn_t
 	bool	 admin;
 	ghost_t *ghost; // for ghost codes
 					// ZOID
+	/* freeze */
+	edict_t* thawer;
+	bool	old_hook;
+	int	help;
+	int	thawed;
+	/* freeze */
 };
 
 // [Paril-KEX] seconds until we are fully invisible after
@@ -3006,6 +3012,15 @@ struct gclient_t
 	gtime_t	 last_attacker_time;
 	// saved - for coop; last time we were in a firing state
 	gtime_t	 last_firing_time;
+	/* freeze */
+	bool	frozen;
+	edict_t* viewed;
+	gtime_t	thaw_time;
+	gtime_t	frozen_time;
+	int	hookstate;
+	int	hooker;
+	gtime_t	moan_time;
+	/* freeze */
 };
 
 // ==========================================

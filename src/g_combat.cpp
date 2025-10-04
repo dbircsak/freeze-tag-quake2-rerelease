@@ -3,6 +3,9 @@
 // g_combat.c
 
 #include "g_local.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 /*
 ============
@@ -549,6 +552,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
+	/* freeze
 	if ((targ != attacker) && !(dflags & DAMAGE_NO_PROTECTION))
 	{
 		// mark as friendly fire
@@ -561,6 +565,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 				damage = 0;
 		}
 	}
+	freeze */
 
 	// ROGUE
 	//  allow the deathmatch game to change values
@@ -618,6 +623,11 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 	damage = CTFApplyStrength(attacker, damage);
 	// ZOID
 
+	/* freeze */
+	if (client && client->frozen)
+		knockback *= 2;
+	else
+	/* freeze */
 	if ((targ->flags & FL_NO_KNOCKBACK) ||
 		((targ->flags & FL_ALIVE_KNOCKBACK_ONLY) && (!targ->deadflag || targ->dead_time != level.time)))
 		knockback = 0;
@@ -649,6 +659,15 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 	take = damage;
 	save = 0;
 
+	/* freeze */
+	if (playerDamage(targ, attacker, damage, mod) && !(dflags & DAMAGE_NO_PROTECTION))
+	{
+		take = 0;
+		save = damage;
+		SpawnDamage(te_sparks, point, normal, save);
+		return;
+	}
+	/* freeze */
 	// check for godmode
 	if ((targ->flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION))
 	{

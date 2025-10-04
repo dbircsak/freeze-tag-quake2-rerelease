@@ -12,7 +12,11 @@ void UpdateChaseCam(edict_t *ent)
 	vec3_t	 angles;
 
 	// is our chase target gone?
+	/* freeze */
+	if (!ent->client->chase_target->inuse || ent->client->chase_target->client->resp.spectator || (ent->client->frozen && (ent->client->frozen_time < level.time + 2_sec || ent->client->thaw_time < level.time + 1_sec)) || (ent->health < 0 && !ent->client->frozen))
+	/* freeze
 	if (!ent->client->chase_target->inuse || ent->client->chase_target->client->resp.spectator)
+	freeze */
 	{
 		edict_t *old = ent->client->chase_target;
 		ChaseNext(ent);
@@ -70,12 +74,20 @@ void UpdateChaseCam(edict_t *ent)
 		goal[2] += 6;
 	}
 
+	/* freeze */
+	if (ent->client->frozen) {
+		ent->client->ps.pmove.origin = goal * 8;
+	} else {
+	/* freeze */
 	if (targ->deadflag)
 		ent->client->ps.pmove.pm_type = PM_DEAD;
 	else
 		ent->client->ps.pmove.pm_type = PM_FREEZE;
 
 	ent->s.origin = goal;
+	/* freeze */
+	}
+	/* freeze */
 	ent->client->ps.pmove.delta_angles = targ->client->v_angle - ent->client->resp.cmd_angles;
 
 	if (targ->deadflag)
@@ -92,6 +104,9 @@ void UpdateChaseCam(edict_t *ent)
 	}
 
 	ent->viewheight = 0;
+	/* freeze */
+	if (!ent->client->frozen)
+	/* freeze */
 	ent->client->ps.pmove.pm_flags |= PMF_NO_POSITIONAL_PREDICTION | PMF_NO_ANGULAR_PREDICTION;
 	gi.linkentity(ent);
 }
@@ -102,7 +117,11 @@ void ChaseNext(edict_t *ent)
 	edict_t	*e;
 
 	if (!ent->client->chase_target)
+		/* freeze
 		return;
+		freeze */
+		ent->client->chase_target = ent;
+		/* freeze */
 
 	i = ent->client->chase_target - g_edicts;
 	do
@@ -113,10 +132,23 @@ void ChaseNext(edict_t *ent)
 		e = g_edicts + i;
 		if (!e->inuse)
 			continue;
+		/* freeze */
+		if (!ent->client->resp.spectator && e->client->resp.ctf_team != ent->client->resp.ctf_team)
+			continue;
+		if (e->client->frozen && e != ent)
+			continue;
+		/* freeze */
 		if (!e->client->resp.spectator)
 			break;
 	} while (e != ent->client->chase_target);
 
+	/* freeze */
+	if (e == ent) {
+		ent->client->chase_target = nullptr;
+		ent->client->ps.pmove.pm_flags &= ~(PMF_NO_POSITIONAL_PREDICTION | PMF_NO_ANGULAR_PREDICTION);
+	}
+	else
+	/* freeze */
 	ent->client->chase_target = e;
 	ent->client->update_chase = true;
 }
@@ -127,7 +159,11 @@ void ChasePrev(edict_t *ent)
 	edict_t *e;
 
 	if (!ent->client->chase_target)
+		/* freeze
 		return;
+		freeze */
+		ent->client->chase_target = ent;
+		/* freeze */
 
 	i = ent->client->chase_target - g_edicts;
 	do
@@ -138,16 +174,30 @@ void ChasePrev(edict_t *ent)
 		e = g_edicts + i;
 		if (!e->inuse)
 			continue;
+		/* freeze */
+		if (!ent->client->resp.spectator && e->client->resp.ctf_team != ent->client->resp.ctf_team)
+			continue;
+		if (e->client->frozen && e != ent)
+			continue;
+		/* freeze */
 		if (!e->client->resp.spectator)
 			break;
 	} while (e != ent->client->chase_target);
 
+	/* freeze */
+	if (e == ent) {
+		ent->client->chase_target = nullptr;
+		ent->client->ps.pmove.pm_flags &= ~(PMF_NO_POSITIONAL_PREDICTION | PMF_NO_ANGULAR_PREDICTION);
+	}
+	else
+	/* freeze */
 	ent->client->chase_target = e;
 	ent->client->update_chase = true;
 }
 
 void GetChaseTarget(edict_t *ent)
 {
+	/* freeze
 	uint32_t i;
 	edict_t *other;
 
@@ -162,6 +212,13 @@ void GetChaseTarget(edict_t *ent)
 			return;
 		}
 	}
+	freeze */
+	ChaseNext(ent);
+
+	if (ent->client->chase_target)
+		UpdateChaseCam(ent);
+	else
+	/* freeze */
 
 	if (ent->client->chase_msg_time <= level.time)
 	{

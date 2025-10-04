@@ -424,6 +424,11 @@ void G_TouchTriggers(edict_t *ent)
 	static edict_t *touch[MAX_EDICTS];
 	edict_t *hit;
 
+	/* freeze */
+	if (ent->client && ent->client->frozen)
+		;
+	else
+	/* freeze */
 	// dead things don't activate triggers!
 	if ((ent->client || (ent->svflags & SVF_MONSTER)) && (ent->health <= 0))
 		return;
