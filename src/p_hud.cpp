@@ -2,6 +2,9 @@
 // Licensed under the GNU General Public License 2.0.
 #include "g_local.h"
 #include "g_statusbar.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 /*
 ======================================================================
@@ -272,6 +275,9 @@ void BeginIntermission(edict_t *targ)
 	if (level.intermissiontime)
 		return; // already activated
 
+	/* freeze */
+	freezeIntermission();
+	/* freeze */
 	// ZOID
 	if (ctf->integer)
 		CTFCalcScores();
@@ -282,6 +288,7 @@ void BeginIntermission(edict_t *targ)
 	level.intermissiontime = level.time;
 
 	// respawn any dead clients
+	/* freeze
 	for (uint32_t i = 0; i < game.maxclients; i++)
 	{
 		client = g_edicts + 1 + i;
@@ -298,6 +305,7 @@ void BeginIntermission(edict_t *targ)
 			respawn(client);
 		}
 	}
+	freeze */
 
 	level.intermission_server_frame = gi.ServerFrame();
 	level.changemap = targ->map;
@@ -1117,6 +1125,9 @@ void G_SetSpectatorStats(edict_t *ent)
 	if (!cl->chase_target)
 		G_SetStats(ent);
 
+	/* freeze */
+	if (cl->resp.spectator)
+	/* freeze */
 	cl->ps.stats[STAT_SPECTATOR] = 1;
 
 	// layouts are independant in spectator

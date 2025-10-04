@@ -2,6 +2,9 @@
 // Licensed under the GNU General Public License 2.0.
 
 #include "g_local.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 struct spawn_t
 {
@@ -1663,6 +1666,9 @@ void SP_worldspawn(edict_t *ent)
 	//
 
 	// 0 normal
+	/* freeze */
+	freezeSpawn();
+	/* freeze */
 	gi.configstring(CS_LIGHTS + 0, "m");
 
 	// 1 FLICKER (first variety)

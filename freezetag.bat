@@ -7,4 +7,6 @@ if not exist "%MODDIR%" (
 )
 
 copy /Y "game_x64.dll" "%MODDIR%\"
-start "" /D "%Q2DIR%" quake2.exe +set game freezetag +map strike +set deathmatch 1 +set teamplay 1 +set developer 1 +addbot +addbot +addbot +addbot +addbot +addbot +addbot
+copy /Y "autoexec.cfg" "%MODDIR%\"
+copy /Y "freeze.cfg" "%MODDIR%\"
+start "" /D "%Q2DIR%" quake2.exe +set game freezetag +exec freeze.cfg +map ndctf0 +set deathmatch 1 +set teamplay 1 +set developer 1 +set cheats 1 +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot +addbot

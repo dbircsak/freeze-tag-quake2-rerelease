@@ -1564,6 +1564,13 @@ void CTFTeam_f(edict_t *ent)
 		return;
 	}
 
+	/* freeze */
+	if (ent->client->frozen) {
+		gi.LocClient_Print(ent, PRINT_HIGH, "$g_cant_change_teams");
+		return;
+	}
+	/* freeze */
+
 	////
 	ent->svflags = SVF_NONE;
 	ent->flags &= ~FL_GODMODE;
@@ -1662,6 +1669,11 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 	// [Paril-KEX] time & frags
 	if (teamplay->integer)
 	{
+		/* freeze */
+		if (capturelimit->integer) {
+			fmt::format_to(std::back_inserter(string), FMT_STRING("xv -20 yv -10 loc_string2 1 $g_score_captures \"{}\" "), capturelimit->integer);
+		} else
+		/* freeze */
 		if (fraglimit->integer)
 		{
 			fmt::format_to(std::back_inserter(string), FMT_STRING("xv -20 yv -10 loc_string2 1 $g_score_frags \"{}\" "), fraglimit->integer);
@@ -1680,6 +1692,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 	}
 
 	// team one
+	/* freeze
 	if (teamplay->integer)
 	{
 		fmt::format_to(std::back_inserter(string),
@@ -1693,6 +1706,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 			total[1]);
 	}
 	else
+	freeze */
 	{
 		fmt::format_to(std::back_inserter(string),
 			FMT_STRING("if 25 xv -32 yv 8 pic 25 endif "
@@ -1721,7 +1735,11 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 						sorted[0][i],
 						cl->resp.score,
 						cl->ping > 999 ? 999 : cl->ping,
+						/* freeze */
+						cl_ent->client->frozen ? "sbfctf1" : "\"\"");
+						/* freeze
 						cl_ent->client->pers.inventory[IT_FLAG2] ? "sbfctf2" : "\"\"");
+						freeze */
 
 			if (string.size() + entry.size() < MAX_CTF_STAT_LENGTH)
 			{
@@ -1741,7 +1759,11 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 						sorted[1][i],
 						cl->resp.score,
 						cl->ping > 999 ? 999 : cl->ping,
+						/* freeze */
+						cl_ent->client->frozen ? "sbfctf2" : "\"\"");
+						/* freeze
 						cl_ent->client->pers.inventory[IT_FLAG1] ? "sbfctf1" : "\"\"");
+						freeze */
 			
 			if (string.size() + entry.size() < MAX_CTF_STAT_LENGTH)
 			{

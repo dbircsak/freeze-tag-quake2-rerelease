@@ -2,6 +2,9 @@
 // Licensed under the GNU General Public License 2.0.
 #include "g_local.h"
 #include "m_player.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 void SelectNextItem(edict_t *ent, item_flags_t itflags, bool menu = true)
 {
@@ -22,6 +25,12 @@ void SelectNextItem(edict_t *ent, item_flags_t itflags, bool menu = true)
 		ChaseNext(ent);
 		return;
 	}
+	/* freeze */
+	else if (cl->frozen) {
+		ChaseNext(ent);
+		return;
+	}
+	/* freeze */
 	// ZOID
 
 	// scan  for the next valid one
@@ -64,6 +73,12 @@ void SelectPrevItem(edict_t *ent, item_flags_t itflags)
 		ChasePrev(ent);
 		return;
 	}
+	/* freeze */
+	else if (cl->frozen) {
+		ChasePrev(ent);
+		return;
+	}
+	/* freeze */
 	// ZOID
 
 	// scan  for the next valid one
@@ -981,6 +996,10 @@ void Cmd_Kill_f(edict_t *ent)
 
 	if ((level.time - ent->client->respawn_time) < 5_sec)
 		return;
+	/* freeze */
+	if (ent->health <= 0)
+		return;
+	/* freeze */
 
 	ent->flags &= ~FL_GODMODE;
 	ent->health = 0;
@@ -1483,6 +1502,13 @@ void Cmd_Switchteam_f(edict_t* ent)
 	if (!G_TeamplayEnabled())
 		return;
 
+	/* freeze */
+	if (ent->client->frozen) {
+		gi.LocClient_Print(ent, PRINT_HIGH, "$g_cant_change_teams");
+		return;
+	}
+	/* freeze */
+
 	// [Paril-KEX] in force-join, just do a regular team join.
 	if (g_teamplay_force_join->integer)
 	{
@@ -1742,6 +1768,10 @@ void ClientCommand(edict_t *ent)
 	// ZOID
 	else if (Q_strcasecmp(cmd, "switchteam") == 0)
 		Cmd_Switchteam_f(ent);
+	/* freeze */
+	else if (Q_strcasecmp(cmd, "hook") == 0)
+		cmdHook(ent);
+	/* freeze */
 #ifndef KEX_Q2_GAME
 	else // anything that doesn't match a command will be a chat
 		Cmd_Say_f(ent, true);

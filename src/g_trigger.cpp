@@ -496,7 +496,11 @@ TOUCH(trigger_push_touch) (edict_t *self, edict_t *other, const trace_t &tr, boo
 	{
 		other->velocity = self->movedir * (self->speed * 10);
 	}
+	/* freeze */
+	else if (other->health > 0 || (other->client && other->client->frozen))
+	/* freeze
 	else if (other->health > 0)
+	freeze */
 	{
 		other->velocity = self->movedir * (self->speed * 10);
 

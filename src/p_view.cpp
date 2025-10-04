@@ -4,6 +4,9 @@
 #include "g_local.h"
 #include "m_player.h"
 #include "bots/bot_includes.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 static edict_t   *current_player;
 static gclient_t *current_client;
@@ -307,7 +310,11 @@ void SV_CalcViewOffset(edict_t *ent)
 	vec3_t &angles = ent->client->ps.kick_angles;
 
 	// if dead, fix the angle and don't add any kick
+	/* freeze */
+	if (ent->deadflag && !ent->client->resp.spectator && !ent->client->frozen)
+	/* freeze
 	if (ent->deadflag && !ent->client->resp.spectator)
+	freeze */
 	{
 		angles = {};
 
@@ -628,6 +635,15 @@ void SV_CalcBlend(edict_t *ent)
 		if (G_PowerUpExpiringRelative(remaining))
 			G_AddBlend(0.4f, 1, 0.4f, 0.04f, ent->client->ps.screen_blend);
 	}
+	/* freeze */
+	else if (ent->client->frozen && !ent->client->chase_target && (!ent->client->resp.thawer || ((level.time.milliseconds() / 100) % 16) < 8))
+	{
+		if (ent->client->resp.ctf_team == CTF_TEAM1)
+			G_AddBlend(0.6f, 0, 0, 0.4f, ent->client->ps.screen_blend);
+		else if (ent->client->resp.ctf_team == CTF_TEAM2)
+			G_AddBlend(0.6f, 0.6f, 0.6f, 0.4f, ent->client->ps.screen_blend);
+	}
+	/* freeze */
 
 	// PGM
 	if (ent->client->nuke_time > level.time)
@@ -866,6 +882,10 @@ void G_SetClientEffects(edict_t *ent)
 	ent->s.renderfx &= RF_STAIR_STEP;
 	ent->s.renderfx |= RF_IR_VISIBLE;
 	ent->s.alpha = 1.0;
+
+	/* freeze */
+	freezeEffects(ent);
+	/* freeze */
 
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
@@ -1369,8 +1389,16 @@ void ClientEndServerFrame(edict_t *ent)
 	// If it wasn't updated here, the view position would lag a frame
 	// behind the body position when pushed -- "sinking into plats"
 	//
+	/* freeze */
+	if (current_client->frozen && current_client->chase_target)
+		UpdateChaseCam(ent);
+	else {
+	/* freeze */
 	current_client->ps.pmove.origin = ent->s.origin;
 	current_client->ps.pmove.velocity = ent->velocity;
+	/* freeze */
+	}
+	/* freeze */
 
 	//
 	// If the end of unit layout is displayed, don't give
@@ -1468,6 +1496,11 @@ void ClientEndServerFrame(edict_t *ent)
 	SV_CalcBlend(ent);
 
 	// chase cam stuff
+	/* freeze */
+	if (ent->client->frozen)
+		G_SetSpectatorStats(ent);
+	else
+	/* freeze */
 	if (ent->client->resp.spectator)
 		G_SetSpectatorStats(ent);
 	else

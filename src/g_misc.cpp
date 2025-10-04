@@ -3,6 +3,9 @@
 // g_misc.c
 
 #include "g_local.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 /*QUAKED func_group (0 0 0) ?
 Used to group brushes together just for editor convenience.
@@ -91,6 +94,10 @@ edict_t *ThrowGib(edict_t *self, const char *gibname, int damage, gib_type_t typ
 	vec3_t	 size;
 	float	 vscale;
 
+	/* freeze */
+	if (gibCheck())
+		return nullptr;
+	/* freeze */
 	if (type & GIB_HEAD)
 	{
 		gib = self;
@@ -198,7 +205,18 @@ edict_t *ThrowGib(edict_t *self, const char *gibname, int damage, gib_type_t typ
 	gib->s.angles[1] = frandom(359);
 	gib->s.angles[2] = frandom(359);
 
+	/* freeze */
+	if (self->inuse && self->client && self->client->frozen)
+	{
+		playerShell(gib, self->client->resp.ctf_team);
+		if (frandom() > 0.2)
+			gib->s.effects &= ~EF_GIB;
+	}
+
+	gib->think = gibThink;
+	/* freeze
 	gib->think = G_FreeEdict;
+	freeze */
 
 	if (g_instagib->integer)
 		gib->nextthink = level.time + random_time(1_sec, 5_sec);
@@ -242,7 +260,11 @@ void ThrowClientHead(edict_t *self, int damage)
 	self->takedamage = true; // [Paril-KEX] allow takedamage so we get crushed
 	self->solid = SOLID_TRIGGER; // [Paril-KEX] make 'trigger' so we still move but don't block shots/explode
 	self->svflags |= SVF_DEADMONSTER;
+	/* freeze */
+	self->s.effects |= EF_GIB;
+	/* freeze
 	self->s.effects = EF_GIB;
+	freeze */
 	// PGM
 	self->s.renderfx |= RF_IR_VISIBLE;
 	// PGM

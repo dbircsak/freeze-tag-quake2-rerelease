@@ -3,6 +3,9 @@
 #include "g_local.h"
 #include "m_player.h"
 #include "bots/bot_includes.h"
+/* freeze */
+#include "g_freeze.h"
+/* freeze */
 
 void SP_misc_teleporter_dest(edict_t *ent);
 
@@ -589,6 +592,9 @@ DIE(player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				self->client->pers.inventory[n] = 0;
 			}
 		}
+		/* freeze */
+		freeze[get_team_int(self->client->resp.ctf_team)].update = true;
+		/* freeze */
 	}
 
 	if (gamerules->integer) // if we're in a dm game, alert the game
@@ -648,8 +654,24 @@ DIE(player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	// ROGUE
 	//==============
 
+	/* freeze */
+	if (freezeCheck(self, mod)) {
+		freezeAnim(self);
+		return;
+	}
+	/* freeze */
 	if (self->health < -40)
 	{
+		/* freeze */
+		if (self->client->frozen)
+		{
+			if (mod.id == MOD_FALLING && damage < 250)
+				return;
+			self->client->frozen_time = level.time + 1_sec;
+			self->takedamage = false;
+			return;
+		}
+		/* freeze */
 		// PMM
 		// don't toss gibs if we got vaped by the nuke
 		if (!(self->flags & FL_NOGIB))
@@ -914,6 +936,10 @@ void InitClientResp(gclient_t *client)
 	ctfteam_t ctf_team = client->resp.ctf_team;
 	bool id_state = client->resp.id_state;
 	// ZOID
+	/* freeze */
+	bool	old_hook = client->resp.old_hook;
+	int	help = client->resp.help;
+	/* freeze */
 
 	memset(&client->resp, 0, sizeof(client->resp));
 
@@ -924,6 +950,10 @@ void InitClientResp(gclient_t *client)
 
 	client->resp.entertime = level.time;
 	client->resp.coop_respawn = client->pers;
+	/* freeze */
+	client->resp.old_hook = old_hook;
+	client->resp.help = help;
+	/* freeze */
 }
 
 /*
@@ -1663,6 +1693,16 @@ void spectator_respawn(edict_t *ent)
 			gi.unicast(ent, true);
 			return;
 		}
+		/* freeze */
+		if (ent->client->frozen)
+		{
+			ent->client->pers.spectator = false;
+			gi.WriteByte(svc_stufftext);
+			gi.WriteString("spectator 0\n");
+			gi.unicast(ent, true);
+			return;
+		}
+		/* freeze */
 
 		// count spectators
 		for (i = 1, numspec = 0; i <= game.maxclients; i++)
@@ -2294,8 +2334,13 @@ void PutClientInServer(edict_t *ent)
 	}
 
 	// force the current weapon up
+	/* freeze
 	client->newweapon = client->pers.weapon;
 	ChangeWeapon(ent);
+	freeze */
+	playerWeapon(ent);
+	freeze[get_team_int(ent->client->resp.ctf_team)].update = true;
+	/* freeze */
 
 	if (was_waiting_for_respawn)
 		G_PostRespawn(ent);
@@ -2842,6 +2887,7 @@ bool ClientConnect(edict_t *ent, char *userinfo, const char *social_id, bool isB
 	char value[MAX_INFO_VALUE] = { 0 };
 	gi.Info_ValueForKey(userinfo, "spectator", value, sizeof(value));
 
+	/* freeze
 	if (deathmatch->integer && *value && strcmp(value, "0"))
 	{
 		uint32_t i, numspec;
@@ -2866,6 +2912,7 @@ bool ClientConnect(edict_t *ent, char *userinfo, const char *social_id, bool isB
 		}
 	}
 	else
+	freeze */
 	{
 		// check for a password ( if not a bot! )
 		gi.Info_ValueForKey(userinfo, "password", value, sizeof(value));
@@ -2887,6 +2934,12 @@ bool ClientConnect(edict_t *ent, char *userinfo, const char *social_id, bool isB
 	// take it, otherwise spawn one from scratch
 	if (ent->inuse == false)
 	{
+		/* freeze */
+		ent->client->resp.thawer = nullptr;
+		ent->client->resp.old_hook = false;
+		ent->client->resp.help = 0;
+		ent->client->resp.thawed = 0;
+		/* freeze */
 		// clear the respawning variables
 		// ZOID -- force team join
 		ent->client->resp.ctf_team = CTF_NOTEAM;
@@ -2984,6 +3037,9 @@ void ClientDisconnect(edict_t *ent)
 		for (auto player : active_players())
 			if (player->client->showscores)
 				player->client->menutime = level.time;
+	/* freeze */
+	freeze[get_team_int(ent->client->resp.ctf_team)].update = true;
+	/* freeze */
 }
 
 //==============================================================
@@ -3197,7 +3253,11 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		return;
 	}
 
+	/* freeze */
+	if (ent->client->chase_target && !ent->client->frozen)
+	/* freeze
 	if (ent->client->chase_target)
+	freeze */
 	{
 		client->resp.cmd_angles = ucmd->angles;
 		ent->movetype = MOVETYPE_NOCLIP;
@@ -3334,7 +3394,11 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		if (pm.groundentity)
 			ent->groundentity_linkcount = pm.groundentity->linkcount;
 
+		/* freeze */
+		if (ent->deadflag && !ent->client->frozen)
+		/* freeze
 		if (ent->deadflag)
+		freeze */
 		{
 			client->ps.viewangles[ROLL] = 40;
 			client->ps.viewangles[PITCH] = -15;
@@ -3363,6 +3427,12 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 			G_TouchTriggers(ent);
 			G_TouchProjectiles(ent, old_origin);
 		}
+		/* freeze */
+		if (ent->client->frozen) {
+			G_TouchTriggers(ent);
+			G_TouchProjectiles(ent, old_origin);
+		}
+		/* freeze */
 
 		// touch other objects
 		for (i = 0; i < pm.touch.num; i++)
@@ -3407,6 +3477,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
+	/* freeze
 	if (client->resp.spectator)
 	{
 		if (!HandleMenuMovement(ent, ucmd))
@@ -3426,6 +3497,7 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 				client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
 		}
 	}
+	freeze */
 
 	// update chase cam if being followed
 	for (i = 1; i <= game.maxclients; i++)
@@ -3771,6 +3843,9 @@ void ClientBeginServerFrame(edict_t *ent)
 
 	client = ent->client;
 
+	/* freeze */
+	freezeMain(ent);
+	/* freeze */
 	if (client->awaiting_respawn)
 	{
 		if ((level.time.milliseconds() % 500) == 0)
@@ -3813,6 +3888,13 @@ void ClientBeginServerFrame(edict_t *ent)
 				if ((client->latched_buttons & buttonMask) ||
 					(deathmatch->integer && g_dm_force_respawn->integer))
 				{
+					/* freeze */
+					if (client->frozen) {
+						if (client->latched_buttons & BUTTON_ATTACK)
+							cmdMoan(ent);
+					}
+					else
+					/* freeze */
 					respawn(ent);
 					client->latched_buttons = BUTTON_NONE;
 				}
