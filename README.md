@@ -22,6 +22,5 @@ Shoot the enemy team. When they die, they "freeze" and cannot respawn. Kill ever
 - Works with bots, though they don't unfreeze people
 
 ## Known issues:
-- Doesn't update team score currently
-- Using chase cam can crash the game
+- Using chase cam not really working
 - I have no way to test this other than to play bots. I can't believe they didn't release a dedicated server! Truly a shame.
