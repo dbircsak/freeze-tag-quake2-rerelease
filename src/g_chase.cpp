@@ -29,6 +29,13 @@ void UpdateChaseCam(edict_t *ent)
 	}
 
 	targ = ent->client->chase_target;
+	/* freeze */
+	if (!targ || targ->client->frozen) {
+		ent->client->chase_target = nullptr;
+		ent->client->ps.pmove.pm_flags &= ~(PMF_NO_POSITIONAL_PREDICTION | PMF_NO_ANGULAR_PREDICTION);
+		return;
+	}
+	/* freeze */
 
 	ownerv = targ->s.origin;
 	oldgoal = ent->s.origin;

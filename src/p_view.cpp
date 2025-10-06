@@ -311,7 +311,7 @@ void SV_CalcViewOffset(edict_t *ent)
 
 	// if dead, fix the angle and don't add any kick
 	/* freeze */
-	if (ent->deadflag && !ent->client->resp.spectator && !ent->client->frozen)
+	if (ent->deadflag && (!ent->client->resp.spectator || !ent->client->frozen))
 	/* freeze
 	if (ent->deadflag && !ent->client->resp.spectator)
 	freeze */

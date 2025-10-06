@@ -1503,7 +1503,7 @@ void Cmd_Switchteam_f(edict_t* ent)
 		return;
 
 	/* freeze */
-	if (ent->client->frozen) {
+	if (ent->client->frozen && humanPlaying(ent)) {
 		gi.LocClient_Print(ent, PRINT_HIGH, "$g_cant_change_teams");
 		return;
 	}

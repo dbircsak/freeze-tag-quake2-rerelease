@@ -196,8 +196,10 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 		{
 			self->client->resp.score--;
 
+			/* freeze
 			if (teamplay->integer)
 				G_AdjustTeamScore(self->client->resp.ctf_team, -1);
+			freeze */
 		}
 		self->enemy = nullptr;
 		return;
@@ -372,16 +374,20 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 				{
 					attacker->client->resp.score--;
 
+					/* freeze
 					if (teamplay->integer)
 						G_AdjustTeamScore(attacker->client->resp.ctf_team, -1);
+					freeze */
 				}
 			}
 			else
 			{
 				attacker->client->resp.score++;
 
+				/* freeze
 				if (teamplay->integer)
 					G_AdjustTeamScore(attacker->client->resp.ctf_team, 1);
+				freeze */
 			}
 		}
 		else if (!coop->integer)
@@ -406,8 +412,10 @@ void ClientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker, mod_t 
 		{
 			self->client->resp.score--;
 
+			/* freeze
 			if (teamplay->integer)
 				G_AdjustTeamScore(attacker->client->resp.ctf_team, -1);
+			freeze */
 		}
 	}
 	// ROGUE
@@ -3477,6 +3485,9 @@ void ClientThink(edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
+	/* freeze */
+	if (ucmd->buttons & BUTTON_JUMP && ent->health > 0)
+		client->buttons |= BUTTON_CROUCH;
 	/* freeze
 	if (client->resp.spectator)
 	{
