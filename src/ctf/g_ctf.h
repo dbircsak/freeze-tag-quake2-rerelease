@@ -77,6 +77,9 @@ void CTFSpawn();
 void CTFPrecache();
 bool G_TeamplayEnabled();
 void G_AdjustTeamScore(ctfteam_t team, int32_t offset);
+/* freeze */
+int get_team_score(int i);
+/* freeze */
 
 void SP_info_player_team1(edict_t *self);
 void SP_info_player_team2(edict_t *self);

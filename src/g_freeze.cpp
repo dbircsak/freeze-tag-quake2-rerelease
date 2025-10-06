@@ -35,8 +35,6 @@ uint32_t get_team_int(ctfteam_t t) {
 	return 1;
 }
 
-#define	far_off	gtime_t::from_sec(100000000)
-
 #define	hook_on	0x00000001
 #define	hook_in	0x00000002
 #define	shrink_on	0x00000004
@@ -88,8 +86,8 @@ static int	moan[8];
 
 void putInventory(const char* s, edict_t* ent)
 {
-	gitem_t* item = NULL;
-	gitem_t* ammo = NULL;
+	gitem_t* item = nullptr;
+	gitem_t* ammo = nullptr;
 	int	index;
 
 	item = FindItem(s);
@@ -280,8 +278,8 @@ void freezeAnim(edict_t* ent)
 		gi.sound(ent, CHAN_BODY, gi.soundindex("boss3/d_hit.wav"), 1, ATTN_NORM, 0);
 	ent->client->frozen = true;
 	ent->client->frozen_time = level.time + gtime_t::from_sec(frozen_time->value);
-	ent->client->resp.thawer = NULL;
-	ent->client->thaw_time = far_off;
+	ent->client->resp.thawer = nullptr;
+	ent->client->thaw_time = HOLD_FOREVER;
 	if (frandom() > 0.3)
 		ent->client->hookstate -= ent->client->hookstate & (grow_on | shrink_on);
 	ent->deadflag = true;
@@ -321,10 +319,10 @@ void playerView(edict_t* ent)
 		return;
 
 	other_dot = 0.3f;
-	best_other = NULL;
+	best_other = nullptr;
 	VectorCopy(ent->s.origin, ent_origin);
 	ent_origin[2] += ent->viewheight;
-	AngleVectors(ent->s.angles, forward, NULL, NULL);
+	AngleVectors(ent->s.angles, forward, nullptr, nullptr);
 
 	for (uint32_t i = 0; i < game.maxclients; i++)
 	{
@@ -356,7 +354,7 @@ void playerView(edict_t* ent)
 	if (best_other)
 		ent->client->viewed = best_other;
 	else
-		ent->client->viewed = NULL;
+		ent->client->viewed = nullptr;
 }
 
 void playerThaw(edict_t* ent)
@@ -390,15 +388,15 @@ void playerThaw(edict_t* ent)
 			gi.sound(other, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
 		}
 		ent->client->resp.thawer = other;
-		if (ent->client->thaw_time == far_off)
+		if (ent->client->thaw_time == HOLD_FOREVER)
 		{
 			ent->client->thaw_time = level.time + 3_sec;
 			gi.sound(ent, CHAN_BODY, gi.soundindex("world/steam3.wav"), 1, ATTN_NORM, 0);
 		}
 		return;
 	}
-	ent->client->resp.thawer = NULL;
-	ent->client->thaw_time = far_off;
+	ent->client->resp.thawer = nullptr;
+	ent->client->thaw_time = HOLD_FOREVER;
 }
 
 void playerBreak(edict_t* ent, int force)
@@ -455,8 +453,8 @@ void playerUnfreeze(edict_t* ent)
 	{
 		if (!ent->client->resp.thawer || !ent->client->resp.thawer->inuse)
 		{
-			ent->client->resp.thawer = NULL;
-			ent->client->thaw_time = far_off;
+			ent->client->resp.thawer = nullptr;
+			ent->client->thaw_time = HOLD_FOREVER;
 		}
 		else
 		{
@@ -482,7 +480,7 @@ void playerMove(edict_t* ent)
 
 	if (ent->client->hookstate)
 		return;
-	AngleVectors(ent->s.angles, forward, NULL, NULL);
+	AngleVectors(ent->s.angles, forward, nullptr, nullptr);
 	for (uint32_t i = 0; i < game.maxclients; i++)
 	{
 		other = g_edicts + 1 + i;
@@ -532,11 +530,11 @@ void freezeIntermission(void)
 
 	i = j = k = 0;
 	for (i = 0; i < 2; i++)
-		if (freeze[i].score > j)
-			j = freeze[i].score;
+		if (get_team_score(i) > j)
+			j = get_team_score(i);
 
 	for (i = 0; i < 2; i++)
-		if (freeze[i].score == j)
+		if (get_team_score(i) == j)
 		{
 			k++;
 			team = i;
@@ -562,9 +560,6 @@ void freezeIntermission(void)
 		return;
 	}
 	gi.LocBroadcast_Print(PRINT_HIGH, "{} team is the winner!\n", freeze_team[team]);
-	for (i = 0; i < 2; i++)
-		freeze[i].win_time = level.time;
-	freeze[team].win_time = far_off;
 }
 
 void playerHealth(edict_t* ent)
@@ -642,8 +637,7 @@ void updateTeam(int team)
 			if (freeze[i].alive)
 			{
 				play_sound++;
-				freeze[i].score++;
-				freeze[i].win_time = level.time + 5_sec;
+				G_AdjustTeamScore(get_team_enum(i), 1);
 				freeze[i].update = true;
 			}
 		}
@@ -669,7 +663,7 @@ bool endCheck()
 	if (capturelimit->value)
 	{
 		for (i = 0; i < 2; i++)
-			if (freeze[i].score >= capturelimit->value)
+			if (get_team_score(i) >= capturelimit->value)
 				return true;
 	}
 
@@ -678,22 +672,22 @@ bool endCheck()
 
 void cmdMoan(edict_t* ent)
 {
-	if (!(ent->client->resp.help & frozen_help))
+	if (!(ent->client->resp.help & frozen_help) && !(ent->svflags & SVF_BOT))
 	{
 		ent->client->showscores = false;
 		ent->client->resp.help |= frozen_help;
 		gi.LocCenter_Print(ent, "You have been frozen.\nWait to be saved.");
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
 	}
-	//else if (!(ent->client->chase_target || ent->client->resp.help & chase_help))
-	//{
-	//	GetChaseTarget(ent);
-	//	ent->client->showscores = false;
-	//	ent->client->resp.help |= chase_help;
-	//	gi.LocCenter_Print(ent, "Use the chase camera with\nyour inventory keys.");
-	//	gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
-	//	return;
-	//}
+	else if (!(ent->client->chase_target || ent->client->resp.help & chase_help) && !(ent->svflags & SVF_BOT))
+	{
+		GetChaseTarget(ent);
+		ent->client->showscores = false;
+		ent->client->resp.help |= chase_help;
+		gi.LocCenter_Print(ent, "Use the chase camera with\nyour inventory keys.");
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
+		return;
+	}
 	if (ent->client->moan_time > level.time)
 		return;
 	ent->client->moan_time = level.time + 2_sec;
@@ -764,7 +758,7 @@ void maintainlinks(edict_t* ent)
 	VectorNormalize2(ent->velocity, norm_hookvel);
 	VectorMA(ent->s.origin, multiplier, norm_hookvel, pred_hookpos);
 
-	AngleVectors(ent->owner->client->v_angle, forward, right, NULL);
+	AngleVectors(ent->owner->client->v_angle, forward, right, nullptr);
 	VectorSet(offset, 8, 8, (float)ent->owner->viewheight - 8);
 	p_projectsourcereverse(ent->owner->client, ent->owner->s.origin, offset, forward, right, start);
 	VectorSubtract(pred_hookpos, start, chainvec);
@@ -839,11 +833,11 @@ THINK(hookbehavior) (edict_t* ent) -> void
 		ent->sounds = motor_off;
 	}
 
-	AngleVectors(ent->owner->client->v_angle, forward, right, NULL);
+	AngleVectors(ent->owner->client->v_angle, forward, right, nullptr);
 	VectorSet(offset, 8, 8, (float)ent->owner->viewheight - 8);
 	p_projectsourcereverse(ent->owner->client, ent->owner->s.origin, offset, forward, right, start);
 
-	targ = NULL;
+	targ = nullptr;
 	if (ent->enemy->client)
 	{
 		targ = ent->enemy;
@@ -907,7 +901,7 @@ TOUCH(hooktouch) (edict_t* ent, edict_t* other, const trace_t& tr, bool other_to
 	vec3_t	offset, start = {};
 	vec3_t	chainvec;
 
-	AngleVectors(ent->owner->client->v_angle, forward, right, NULL);
+	AngleVectors(ent->owner->client->v_angle, forward, right, nullptr);
 	VectorSet(offset, 8, 8, (float)ent->owner->viewheight - 8);
 	p_projectsourcereverse(ent->owner->client, ent->owner->s.origin, offset, forward, right, start);
 	VectorSubtract(ent->s.origin, start, chainvec);
@@ -955,7 +949,7 @@ TOUCH(hooktouch) (edict_t* ent, edict_t* other, const trace_t& tr, bool other_to
 	VectorCopy(other->velocity, ent->velocity);
 	ent->owner->client->hookstate |= hook_in;
 	ent->enemy = other;
-	ent->touch = NULL;
+	ent->touch = nullptr;
 	ent->think = hookbehavior;
 	ent->nextthink = level.time + FRAME_TIME_S;
 }
@@ -985,7 +979,7 @@ void firehook(edict_t* ent)
 
 	damage = 10;
 
-	AngleVectors(ent->client->v_angle, forward, right, NULL);
+	AngleVectors(ent->client->v_angle, forward, right, nullptr);
 	VectorSet(offset, 8, 8, (float)ent->viewheight - 8);
 	p_projectsourcereverse(ent->client, ent->s.origin, offset, forward, right, start);
 
@@ -1098,4 +1092,20 @@ void cvarFreeze()
 	start_weapon = gi.cvar("start_weapon", "0", CVAR_NOFLAGS);
 	start_armor = gi.cvar("start_armor", "0", CVAR_NOFLAGS);
 	grapple_wall = gi.cvar("grapple_wall", "1", CVAR_NOFLAGS);
+}
+
+bool humanPlaying(edict_t* ent) {
+	edict_t* other;
+	for (uint32_t i = 0; i < game.maxclients; i++)
+	{
+		other = g_edicts + 1 + i;
+		if (!other->inuse)
+			continue;
+		if (other == ent)
+			continue;
+		if (other->svflags & SVF_BOT)
+			continue;
+		return true;
+	}
+	return false;
 }

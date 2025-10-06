@@ -2,9 +2,7 @@
 #include "g_local.h"
 
 struct {
-	int	score;
 	int	thawed;
-	gtime_t	win_time;
 	bool	update;
 	gtime_t	last_update;
 	int	frozen;
@@ -31,3 +29,4 @@ void freezeEffects(edict_t* ent);
 void cmdHook(edict_t* ent);
 void freezeSpawn();
 void cvarFreeze();
+bool humanPlaying(edict_t* ent);

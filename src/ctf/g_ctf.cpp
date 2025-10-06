@@ -2,6 +2,9 @@
 // Licensed under the GNU General Public License 2.0.
 #include "../g_local.h"
 #include "../m_player.h"
+/* freeze */
+#include "../g_freeze.h"
+/* freeze */
 
 #include <assert.h>
 
@@ -66,6 +69,16 @@ void G_AdjustTeamScore(ctfteam_t team, int32_t offset)
 	else if (team == CTF_TEAM2)
 		ctfgame.total2 += offset;
 }
+
+/* freeze */
+int get_team_score(int i) {
+	if (i == 0)
+		return ctfgame.total1;
+	if (i == 1)
+		return ctfgame.total2;
+	return ctfgame.total2;
+}
+/* freeze */
 
 cvar_t *competition;
 cvar_t *matchlock;
@@ -1565,7 +1578,7 @@ void CTFTeam_f(edict_t *ent)
 	}
 
 	/* freeze */
-	if (ent->client->frozen) {
+	if (ent->client->frozen && humanPlaying(ent)) {
 		gi.LocClient_Print(ent, PRINT_HIGH, "$g_cant_change_teams");
 		return;
 	}

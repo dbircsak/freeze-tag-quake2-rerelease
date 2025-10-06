@@ -552,7 +552,6 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	/* freeze
 	if ((targ != attacker) && !(dflags & DAMAGE_NO_PROTECTION))
 	{
 		// mark as friendly fire
@@ -565,7 +564,6 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, const vec3_t
 				damage = 0;
 		}
 	}
-	freeze */
 
 	// ROGUE
 	//  allow the deathmatch game to change values
