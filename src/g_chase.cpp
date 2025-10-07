@@ -13,14 +13,17 @@ void UpdateChaseCam(edict_t *ent)
 
 	// is our chase target gone?
 	/* freeze */
-	if (!ent->client->chase_target->inuse || ent->client->chase_target->client->resp.spectator || (ent->client->frozen && (ent->client->frozen_time < level.time + 2_sec || ent->client->thaw_time < level.time + 1_sec)) || (ent->health < 0 && !ent->client->frozen))
+	if (!ent->client->chase_target->inuse || ent->client->chase_target->client->resp.spectator || 
+		(ent->client->frozen && (ent->client->frozen_time < level.time + 2_sec || ent->client->thaw_time < level.time + 1_sec)) || 
+		(ent->health < 0 && !ent->client->frozen))
+	{
 	/* freeze
 	if (!ent->client->chase_target->inuse || ent->client->chase_target->client->resp.spectator)
-	freeze */
 	{
 		edict_t *old = ent->client->chase_target;
 		ChaseNext(ent);
 		if (ent->client->chase_target == old)
+	freeze */
 		{
 			ent->client->chase_target = nullptr;
 			ent->client->ps.pmove.pm_flags &= ~(PMF_NO_POSITIONAL_PREDICTION | PMF_NO_ANGULAR_PREDICTION);
@@ -29,13 +32,6 @@ void UpdateChaseCam(edict_t *ent)
 	}
 
 	targ = ent->client->chase_target;
-	/* freeze */
-	if (!targ || targ->client->frozen) {
-		ent->client->chase_target = nullptr;
-		ent->client->ps.pmove.pm_flags &= ~(PMF_NO_POSITIONAL_PREDICTION | PMF_NO_ANGULAR_PREDICTION);
-		return;
-	}
-	/* freeze */
 
 	ownerv = targ->s.origin;
 	oldgoal = ent->s.origin;

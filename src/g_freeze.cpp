@@ -679,15 +679,15 @@ void cmdMoan(edict_t* ent)
 		gi.LocCenter_Print(ent, "You have been frozen.\nWait to be saved.");
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
 	}
-	else if (!(ent->client->chase_target || ent->client->resp.help & chase_help) && !(ent->svflags & SVF_BOT))
-	{
-		GetChaseTarget(ent);
-		ent->client->showscores = false;
-		ent->client->resp.help |= chase_help;
-		gi.LocCenter_Print(ent, "Use the chase camera with\nyour inventory keys.");
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
-		return;
-	}
+	//else if (!(ent->client->chase_target || ent->client->resp.help & chase_help) && !(ent->svflags & SVF_BOT))
+	//{
+	//	GetChaseTarget(ent);
+	//	ent->client->showscores = false;
+	//	ent->client->resp.help |= chase_help;
+	//	gi.LocCenter_Print(ent, "Use the chase camera with\nyour inventory keys.");
+	//	gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/talk1.wav"), 1, ATTN_STATIC, 0);
+	//	return;
+	//}
 	if (ent->client->moan_time > level.time)
 		return;
 	ent->client->moan_time = level.time + 2_sec;

@@ -27,7 +27,7 @@ void SelectNextItem(edict_t *ent, item_flags_t itflags, bool menu = true)
 	}
 	/* freeze */
 	else if (cl->frozen) {
-		ChaseNext(ent);
+		//ChaseNext(ent);
 		return;
 	}
 	/* freeze */
@@ -75,7 +75,7 @@ void SelectPrevItem(edict_t *ent, item_flags_t itflags)
 	}
 	/* freeze */
 	else if (cl->frozen) {
-		ChasePrev(ent);
+		//ChasePrev(ent);
 		return;
 	}
 	/* freeze */

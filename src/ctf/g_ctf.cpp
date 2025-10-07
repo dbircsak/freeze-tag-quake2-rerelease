@@ -3028,6 +3028,13 @@ void CTFObserver(edict_t *ent)
 	if (!G_TeamplayEnabled() || g_teamplay_force_join->integer)
 		return;
 
+	/* freeze */
+	if (ent->client->frozen && humanPlaying(ent)) {
+		gi.LocClient_Print(ent, PRINT_HIGH, "$g_cant_change_teams");
+		return;
+	}
+	/* freeze */
+
 	// start as 'observer'
 	if (ent->movetype == MOVETYPE_NOCLIP)
 		CTFPlayerResetGrapple(ent);
